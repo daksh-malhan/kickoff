@@ -1,11 +1,11 @@
 ---
 name: kickoff
 description: >
-  Full project-kickoff workflow: grill-me-codex hardens the idea into clustered
-  mini-goals, a human approval gate, per-cluster self-driven build loops with
-  Codex sign-off, then a ponytail-audit gate and final Codex verification. Runs
-  on an Obsidian second-brain for cross-session memory. Invoke manually with
-  /kickoff at the start of a new project.
+  Full project-kickoff workflow: grill-me-codex interviews you into a PRD, then a
+  clustered plan derived from it, a human approval gate, per-cluster self-driven
+  build loops with Codex sign-off, then a ponytail-audit gate and final Codex
+  verification. Runs on an Obsidian second-brain for cross-session memory. Invoke
+  manually with /kickoff at the start of a new project.
 disable-model-invocation: true
 user-invocable: true
 ---
@@ -20,14 +20,16 @@ the idea before doing anything else.
 
 ## Phase 1 — Caveman on (token discipline)
 
-Before anything else, activate the `caveman` skill set for the whole session:
+Before anything else, activate caveman for the whole session — chat and commits only:
 - Invoke `/caveman full` so all chat for this project runs token-compressed.
-- Use `/caveman-commit` for every commit and `/caveman-review` for every review.
+- Use `/caveman-commit` for every commit.
 - Persist it: append a line to the project `CLAUDE.md` — "Kickoff: caveman full
-  active for this repo; commits via caveman-commit, reviews via caveman-review" —
-  so future Claude sessions in this repo keep the same discipline.
+  active for this repo; commits via caveman-commit" — so future Claude sessions in
+  this repo keep the same discipline.
 - Caveman's own boundaries still hold: CODE, COMMITS, PRs, and SECURITY notes are
   written normal — only the surrounding chat is compressed. Don't compress code.
+- Do NOT `/caveman-compress` any artifact — PRD, PLAN, review log, and brain notes
+  all stay verbatim. Compression is for live chat, not stored files.
 
 ## Phase 2 — Second brain (Obsidian vault = long-term memory)
 
@@ -53,37 +55,41 @@ Rules:
   demand, never hold all notes in context at once.
 - WRITE-AS-YOU-GO: every resolved decision, every cluster's progress + verify
   evidence, every reusable fact → its vault note. Update `index.md` each time.
-- `/caveman-compress` the brain notes to save tokens (readable `*.original.md` kept).
+- Brain notes stay verbatim — never `/caveman-compress` them. Token savings come
+  from the pointer discipline above, not from rewriting stored files.
 
 ## Phase 3 — Align (human in the loop)
 
-Run `/grill-me-codex` on the idea.
+The grill produces a PRD first; the PLAN is derived FROM the PRD. PRD = what & why
+(intent), PLAN = how (clustered build). Keep them separate so the build always
+traces back to a stated requirement.
 
-- Act 1: Interview me relentlessly, ONE question at a time, depth-first down the
-  decision tree. For each question give your recommended answer plus a one-line
-  rationale. Explore the codebase first for anything the code can already answer.
-- Before exiting Act 1, list every key decision and have me confirm each one
-  explicitly. Nothing implicit. Write each confirmed decision to
-  `brain/decisions/<slug>.md` (with the why) and link it from `brain/index.md`.
-- The plan is not done until each mini-goal has measurable, checkable success
-  criteria (tests pass, lint clean, specific observable behavior). Vague = not done.
-- Bias the plan toward small, compartmentalized, independently-verifiable
-  mini-goals (vertical slices). Each shippable and checkable on its own.
-- Group the mini-goals into clusters (small batches of related slices). The
-  cluster is the unit of Codex review; clusters drive the build cadence.
-- Act 2: Hand the plan to Codex for adversarial cross-model review. Iterate rounds
-  until both models sign off. Codex stays read-only; no code yet.
+**Step 1 — Grill → PRD.** Run `/grill-me-codex` Act 1 on the idea:
+- Interview me relentlessly, ONE question at a time, depth-first down the decision
+  tree. For each question give your recommended answer plus a one-line rationale.
+  Explore the codebase first for anything the code can already answer.
+- Before exiting, list every key decision and have me confirm each one explicitly.
+  Nothing implicit. Write each confirmed decision to `brain/decisions/<slug>.md`
+  (with the why) and link from `brain/index.md`.
+- Capture the result as `PRD.md`: problem & why, target users, requirements,
+  measurable success metrics, scope, and out-of-scope. This is the intent contract.
 
-Output `PLAN.md` (the what) and `PLAN-REVIEW-LOG.md` (the why).
+**Step 2 — PRD → PLAN.** Derive `PLAN.md` from `PRD.md`:
+- Break each PRD requirement into small, independently-verifiable mini-goals
+  (vertical slices). Each mini-goal cites the PRD requirement it serves.
+- Each mini-goal needs measurable, checkable success criteria (tests pass, lint
+  clean, specific observable behavior). Vague = not done.
+- Group mini-goals into clusters (small batches of related slices). The cluster is
+  the unit of Codex review; clusters drive the build cadence.
 
-GATE 1 — STOP. Show me PLAN.md. I approve it by hand before any code is written.
-Do not proceed past this line without my explicit "approved."
+**Step 3 — Codex review.** Run `/grill-me-codex` Act 2: hand Codex BOTH `PRD.md` and
+`PLAN.md` for adversarial cross-model review — does the plan actually satisfy the
+PRD, and is it sound? Iterate rounds until sign-off. Codex stays read-only; no code.
 
-After approval (not before — I read the readable version at the gate), compress the
-log to save tokens on every re-read: `/caveman-compress PLAN-REVIEW-LOG.md`
-(readable `*.original.md` backup kept). Leave `PLAN.md` UNCOMPRESSED — the build
-loops and Codex read its success criteria verbatim; a lossy rewrite there risks the
-whole build.
+Output `PRD.md` (intent), `PLAN.md` (the how), `PLAN-REVIEW-LOG.md` (the why).
+
+GATE 1 — STOP. Show me PRD.md and PLAN.md. I approve by hand before any code is
+written. Do not proceed past this line without my explicit "approved."
 
 ## Phase 4 — Build (unattended loop, by cluster)
 
@@ -132,6 +138,9 @@ After all mini-goals are done:
 (Only the non-obvious ones — each phase justifies itself inline.)
 - Plan is human-gated; loops are unattended. When self-verification and speed
   conflict, the gate wins.
+- PRD before PLAN: the grill settles intent into `PRD.md` (what/why), then the plan
+  is derived from it (how). Every mini-goal traces to a PRD requirement, so the
+  build can't drift from what was actually agreed.
 - Ponytail-audit runs BEFORE the final Codex review, not after: strip
   over-engineering (human-gated) so Codex signs off on the code you keep, not
   pre-trimmed bloat.
