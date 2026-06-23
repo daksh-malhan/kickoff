@@ -21,7 +21,7 @@ human-gated planning stage, then an unattended build with layered verification.
 |-------|------|--------------|
 | 1 | **Caveman on** | Activate token-compressed chat for the whole session. Code, commits, PRs, and security notes stay verbatim. |
 | 2 | **Second brain** | Auto-create an Obsidian vault at `<project>/brain/` for cross-session memory. On restart, state is restored from `brain/index.md` instead of re-derived. |
-| 3 | **Align** | Run `grill-me-codex`: Claude interviews you one question at a time, locks every decision, then Codex adversarially reviews the plan. Output is `PLAN.md` (clustered mini-goals with measurable success criteria) — **GATE 1**: you approve by hand before any code. |
+| 3 | **Align** | Run `grill-me-codex`: Claude interviews you one question at a time and captures intent as `PRD.md` (problem, users, requirements, success metrics, scope). `PLAN.md` is then *derived* from the PRD — clustered mini-goals, each citing the requirement it serves, with measurable success criteria. Codex adversarially reviews both. **GATE 1**: you approve by hand before any code. |
 | 4 | **Build** | For each cluster, a self-driven loop builds every mini-goal to its success criteria, then Codex signs off on the cluster. UI mini-goals run `frontend-design` first. |
 | 5 | **Final verification** | One whole-project regression sweep → `ponytail-audit` over-engineering report (**GATE 2**: you choose what to cut) → re-verify → final Codex review until `VERDICT: APPROVED`. |
 
@@ -42,10 +42,10 @@ and were cut.
 - **Obsidian second-brain** keeps detail on disk; chat holds pointers
   (`see [[cluster-2-progress]]`). This saves tokens across sessions and via
   on-demand reads — not within one continuous chat.
-- **Caveman** compresses chat session-wide. `PLAN.md` is left **uncompressed** —
-  the build loops and Codex read its success criteria verbatim, so a lossy
-  rewrite there is never worth the risk. The review log and brain notes are
-  compressed.
+- **Caveman** compresses live chat and commit messages only — never stored
+  artifacts. `PRD.md`, `PLAN.md`, the review log, and brain notes all stay
+  verbatim, so nothing the build or Codex reads is ever a lossy rewrite. Token
+  savings come from compressed chat plus the pointer discipline above.
 
 ## Install
 
@@ -61,7 +61,7 @@ Then invoke with `/kickoff <your project idea>` at the start of a new project.
 - [`grill-me-codex`](https://github.com/chaseai-yt) — the plan-hardening skill
 - an authenticated Codex CLI (>= 0.130)
 - the `caveman`, `ponytail`, and `frontend-design` skills — kickoff calls
-  `/caveman`, `/caveman-compress`, `/ponytail-audit`, and `/frontend-design`
+  `/caveman`, `/caveman-commit`, `/ponytail-audit`, and `/frontend-design`
   during the run
 
 If any are missing, the skill stops and tells you.
